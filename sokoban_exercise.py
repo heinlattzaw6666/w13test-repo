@@ -138,23 +138,41 @@ def can_enter(board, destination):
 
 
 def push_crate(board, crate_position, vector):
-    """TODO 3：箱を押す。"""
-    return False
+    """TODO 3：箱を押す。引数：board, 箱座標, 移動方向。戻り値：押せたらTrue。"""
+    next_crate_pos = next_position(crate_position, vector)
+    
+    # 箱の行き先が壁、または別の箱がある場合は押せない
+    if not can_enter(board, next_crate_pos) or next_crate_pos in board["crates"]:
+        return False
+        
+    # 箱の位置を更新する
+    board["crates"].remove(crate_position)
+    board["crates"].add(next_crate_pos)
+    return True
 
 
 def apply_move(board, direction_key):
-    """TODO 1〜3：プレイヤーの移動。"""
+    """TODO 1〜3：プレイヤーの移動。引数：board, WASDの1文字。戻り値：成功ならTrue。"""
     if direction_key not in KEY_TO_VECTOR:
         return False
     vector = KEY_TO_VECTOR[direction_key]
     current_pos = board["hero"]
     next_pos = next_position(current_pos, vector)
     
-    # TODO 2: 盤面内かつ壁でなければ移動可能
+    # TODO 1 & 2: 盤面外または壁なら移動不可
     if not can_enter(board, next_pos):
         return False
         
-    board["past"].append((board["hero"], board["crates"].copy()))
+    # 履歴保存用に、箱が動く前の状態をコピーしておく
+    past_crates = board["crates"].copy()
+    
+    # TODO 3: 次の位置が箱なら push_crate() を呼ぶ
+    if next_pos in board["crates"]:
+        if not push_crate(board, next_pos, vector):
+            return False
+            
+    # 移動が成功したときだけ履歴保存と更新を行う
+    board["past"].append((board["hero"], past_crates))
     board["hero"] = next_pos
     board["steps"] += 1
     return True
