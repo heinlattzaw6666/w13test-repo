@@ -132,24 +132,32 @@ def push_crate(board, crate_position, vector):
     return False
 
 
+def can_enter(board, destination):
+    """TODO 2：壁判定。引数：board, 移動先座標。戻り値：移動可ならTrue。"""
+    return in_field(board, destination) and destination not in board["solid"]
+
+
+def push_crate(board, crate_position, vector):
+    """TODO 3：箱を押す。"""
+    return False
+
+
 def apply_move(board, direction_key):
+    """TODO 1〜3：プレイヤーの移動。"""
     if direction_key not in KEY_TO_VECTOR:
         return False
     vector = KEY_TO_VECTOR[direction_key]
-    
-    # TODO 1: 現在の座標を取得し、次の座標を計算する
     current_pos = board["hero"]
     next_pos = next_position(current_pos, vector)
     
-    # 盤面内なら hero を更新する
-    if not in_field(board, next_pos):
+    # TODO 2: 盤面内かつ壁でなければ移動可能
+    if not can_enter(board, next_pos):
         return False
         
     board["past"].append((board["hero"], board["crates"].copy()))
     board["hero"] = next_pos
     board["steps"] += 1
     return True
-
 
 def step_back(board):
     """Undoを実行。引数：board。戻り値：なし。"""
